@@ -1,17 +1,11 @@
 import os
-import json
 import requests
 from PIL import Image, ImageDraw, ImageFont
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
 from datetime import datetime
 import pytz
 
 # --- CONFIG ---
 API_KEY = os.environ["EXCHANGE_API_KEY"]
-FOLDER_ID = os.environ["GDRIVE_FOLDER_ID"]
-CREDS_JSON = os.environ["GDRIVE_CREDENTIALS"]
 
 # --- FETCH RATES ---
 url = f"https://v6.exchangerate-api.com/v6/{API_KEY}/latest/PHP"
@@ -39,7 +33,7 @@ line_color = (40, 40, 60)
 img = Image.new("RGB", (W, H), bg_color)
 draw = ImageDraw.Draw(img)
 
-# --- FONTS (default fallback) ---
+# --- FONTS ---
 try:
     font_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 52)
     font_sub = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 28)
@@ -70,12 +64,10 @@ for i, (code, (flag, name)) in enumerate(currencies.items()):
     row_bg = (22, 22, 35) if i % 2 == 0 else (28, 28, 42)
     draw.rectangle([40, y, W-40, y+row_h-8], fill=row_bg, outline=line_color, width=1)
 
-    # Flag + Currency
     draw.text((80, y + row_h//2 - 10), flag, font=font_label, fill=white, anchor="lm")
     draw.text((150, y + row_h//2 - 18), code, font=font_label, fill=gold, anchor="lm")
     draw.text((150, y + row_h//2 + 14), name, font=font_small, fill=gray, anchor="lm")
 
-    # Rate
     rate_val = rates.get(code, 0)
     if rate_val and rate_val != 0:
         php_per_unit = 1 / rate_val
@@ -84,7 +76,6 @@ for i, (code, (flag, name)) in enumerate(currencies.items()):
         rate_text = "N/A"
 
     draw.text((W-80, y + row_h//2), rate_text, font=font_rate, fill=white, anchor="rm")
-
     y += row_h
 
 # --- FOOTER ---
@@ -92,23 +83,7 @@ draw.rectangle([0, H-70, W, H], fill=(10, 10, 20))
 draw.rectangle([40, H-68, W-40, H-65], fill=gold)
 draw.text((W//2, H-35), "Follow OFW Business for daily updates", font=font_small, fill=gray, anchor="mm")
 
-# --- SAVE IMAGE ---
-filename = f"php_rates_{now.strftime('%Y%m%d')}.png"
+# --- SAVE IMAGE LOCALLY ---
+filename = "latest_rates.png"
 img.save(filename)
-
-# --- UPLOAD TO GOOGLE DRIVE ---
-creds_dict = json.loads(CREDS_JSON)
-creds = Credentials.from_service_account_info(creds_dict, scopes=["https://www.googleapis.com/auth/drive"])
-service = build("drive", "v3", credentials=creds)
-
-file_metadata = {"name": filename, "parents": [FOLDER_ID]}
-media = MediaFileUpload(filename, mimetype="image/png")
-service.files().create(
-    body=file_metadata,
-    media_body=media,
-    fields="id",
-    supportsAllDrives=True
-).execute()
-
-
-print(f"✅ Done! {filename} uploaded to Google Drive.")
+print(f"✅ Image saved as {filename}")
