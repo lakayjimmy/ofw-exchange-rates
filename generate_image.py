@@ -103,6 +103,12 @@ service = build("drive", "v3", credentials=creds)
 
 file_metadata = {"name": filename, "parents": [FOLDER_ID]}
 media = MediaFileUpload(filename, mimetype="image/png")
-service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+service.files().create(
+    body=file_metadata,
+    media_body=media,
+    fields="id",
+    supportsAllDrives=True
+).execute()
+
 
 print(f"✅ Done! {filename} uploaded to Google Drive.")
