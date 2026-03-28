@@ -3,7 +3,7 @@ name: Daily PHP Exchange Rate
 on:
   schedule:
     - cron: '0 4 * * *'  # 4AM UTC = 8AM Dubai time
-  workflow_dispatch:       # allows manual trigger anytime
+  workflow_dispatch:
 
 jobs:
   generate-and-upload:
@@ -20,11 +20,17 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests pillow google-auth google-auth-httplib2 google-api-python-client pytz
+          pip install requests pillow pytz
 
       - name: Run image generator
         env:
           EXCHANGE_API_KEY: ${{ secrets.EXCHANGE_API_KEY }}
-          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
-          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
         run: python generate_image.py
+
+      - name: Commit and push image
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add latest_rates.png
+          git commit -m "Update exchange rate image - $(date +'%Y-%m-%d')"
+          git push
