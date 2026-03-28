@@ -1,0 +1,30 @@
+name: Daily PHP Exchange Rate
+
+on:
+  schedule:
+    - cron: '0 4 * * *'  # 4AM UTC = 8AM Dubai time
+  workflow_dispatch:       # allows manual trigger anytime
+
+jobs:
+  generate-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pillow google-auth google-auth-httplib2 google-api-python-client pytz
+
+      - name: Run image generator
+        env:
+          EXCHANGE_API_KEY: ${{ secrets.EXCHANGE_API_KEY }}
+          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: python generate_image.py
