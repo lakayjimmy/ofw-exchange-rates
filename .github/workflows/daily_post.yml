@@ -2,7 +2,7 @@ name: Daily PHP Exchange Rate
 
 on:
   schedule:
-    - cron: '0 2 * * 1-5'  # 2AM UTC = 6AM Dubai, Monday-Friday only
+    - cron: '0 0 * * 1-5'  # 12AM UTC = 8AM Philippine time, Monday-Friday only
   workflow_dispatch:
 
 jobs:
