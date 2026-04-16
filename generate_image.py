@@ -8,7 +8,7 @@ import pytz
 API_KEY = os.environ["EXCHANGE_API_KEY"]
 
 # --- CHECK IF WEEKDAY ---
-tz = pytz.timezone("Asia/Dubai")
+tz = pytz.timezone("Asia/Manila")
 now = datetime.now(tz)
 if now.weekday() >= 5:  # 5=Saturday, 6=Sunday
     print("⏭️ Skipping — weekend, market closed.")
@@ -59,7 +59,7 @@ draw.text((W//2, 125), "Daily PHP Exchange Rate", font=font_sub, fill=white, anc
 draw.rectangle([40, 165, W-40, 169], fill=gold)
 
 # --- DATE ---
-date_str = now.strftime("%B %d, %Y  |  %I:%M %p (Dubai Time)")
+date_str = now.strftime("%B %d, %Y  |  %I:%M %p (Philippine Time)")
 draw.text((W//2, 193), date_str, font=font_small, fill=gray, anchor="mm")
 
 # --- RATES ---
